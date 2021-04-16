@@ -6,7 +6,7 @@ var DATABASE = "./database.json";
 function init() // Create database.json, if it's not exist
 {
 	if(!fs.existsSync(DATABASE))
-    {
+    	{
 		console.log("Initialising database.\n Creating `database.json` file");
 		setData([]);	
 	}
