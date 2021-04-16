@@ -3,7 +3,7 @@ var fs = require('fs');
 var DATABASE = "./database.json";
 
 
-function init()
+function init() // Create database.json, if it's not exist
 {
 	if(!fs.existsSync(DATABASE))
     {
@@ -35,11 +35,14 @@ function help()
     const help = `
     --------------------------- (HELP) ----------------------------
 
-    $ node index.js add "title" "body"  ---> Add a new todo
-    $ node index.js ls                  ---> Show remaining todos
-    $ node index.js delete <id>         ---> Delete a todo
-    $ node index.js check  <id>         ---> Complete a todo
-    $ node index.js help                ---> Show help
+    $ node index add "title" "body"        ---> Add a new todo
+    $ node index edit <id> "title" "body"  ---> Add a new todo
+    $ node index check  <id>               ---> Complete a todo
+    $ node index delete <id>               ---> Delete a todo
+    $ node index ls                        ---> Show all todos
+    $ node index ls_checked                ---> Show checked todos
+    $ node index ls_unchecked              ---> Show unchecked todos
+    $ node index help                      ---> Show this help
 
     ---------------------------------------------------------------`;
     console.log(help);
@@ -58,15 +61,12 @@ function add(task, body)
         data.push({ title:task, body:body, completed:false });
         setData(data);
 
-	    list();
+	    list(0);
     }  
     else
     {
         console.log("\x1b[91mYou've to add at least a Title!\n");
     }  
-	
-
-	
 }
 
 
@@ -113,16 +113,29 @@ function del(task)
 }
 
 
-function list() 
+function list(flag) 
 {	
 	var data = getData();
 	
 	if(data.length > 0)
     {
-		console.log("\n\x1b[32m\x1b[40m\x1b[1m                Todo List                      \x1b[24m\x1b[49m\x1b[0m\n");  //   \x1b[0m
+		console.log("\n\x1b[32m\x1b[40m\x1b[1m                Todo List                      \x1b[24m\x1b[49m\x1b[0m\n"); 
 		data.forEach(function (task,index)
         {
-			console.log("\x1b[97m[" + (index+1)+ "]  \x1b[93mTitle: \x1b[0m" + task.title + "   \x1b[93mBody: \x1b[0m" + task.body + " " + " " + (task.completed ? "\x1b[32m✓\x1b[93m" : " ") );
+            if(flag === 0) // list all
+            {
+			    console.log("\x1b[97m[" + (index+1)+ "]  \x1b[93mTitle: \x1b[0m" + task.title + "   \x1b[93mBody: \x1b[0m" + task.body + " " + " " + (task.completed ? "\x1b[32m✓\x1b[93m" : " ") );
+            }
+            else if(flag == 1) // list checked tasks
+            {
+                if(task.completed == true)
+			        console.log("\x1b[97m[" + (index+1)+ "]  \x1b[93mTitle: \x1b[0m" + task.title + "   \x1b[93mBody: \x1b[0m" + task.body + " " + " " +  "\x1b[32m✓\x1b[93m" );   
+            }
+            else if(flag == 2) // list unchecked tasks
+            {
+                if(task.completed == false)
+			        console.log("\x1b[97m[" + (index+1)+ "]  \x1b[93mTitle: \x1b[0m" + task.title + "   \x1b[93mBody: \x1b[0m" + task.body );     
+            }
 		});
 	}
     else
@@ -133,47 +146,6 @@ function list()
 
 }
 
-
-function ls_checked() 
-{	
-	var data = getData();
-	
-	if(data.length > 0)
-    {
-		console.log("\n\x1b[93m\x1b[4mTodo list:\x1b[24m\n");
-		data.forEach(function (task,index)
-        {
-            if(task.completed == true)
-			    console.log("(" + (index+1)+ ")", task.title + " " + task.body + " " + " " + (task.completed ? "\x1b[92m✓\x1b[93m" : " ") );
-		});
-	}
-    else
-    {
-		console.log("\x1b[91mNo tasks added!!");
-	}
-    console.log("\n")
-}
-
-
-function ls_unchecked() 
-{	
-	var data = getData();
-	
-	if(data.length > 0)
-    {
-		console.log("\n\x1b[93m\x1b[4mTodo list:\x1b[24m\n");
-		data.forEach(function (task,index)
-        {
-            if(task.completed == false)
-			    console.log("(" + (index + 1) + ")", task.title + " " + task.body);
-		});
-	}
-    else
-    {
-		console.log("\x1b[91mNo tasks added!!");
-	}
-    console.log("\n")
-}
 
 
 var command   = process.argv[2];
@@ -202,13 +174,13 @@ switch(command)
 		help();
 		break;
 	case 'ls':
-		list();
+		list(0);
 		break;
     case 'ls_checked':
-        ls_checked();
+        list(1);
         break;    
     case 'ls_unchecked':
-        ls_unchecked();
+        list(2);
         break;     
 	default:
 		console.log("\x1b[91mCommand not found!!\x1b[0m");
