@@ -19,7 +19,7 @@
  ```sh
         sudo apt install nodejs
  ```
-(2) It's preferable to install the Node.js package manager (npm)
+(2) Install the Node.js package manager (npm)
  ```sh
         sudo apt install npm
  ```
